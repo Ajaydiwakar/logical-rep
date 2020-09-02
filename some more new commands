@@ -1,0 +1,69 @@
+Use this command to see what process has taken place
+
+on publisher side 
+pub=# select backend_type from pg_stat_activity;
+         backend_type         
+------------------------------
+ autovacuum launcher
+ logical replication launcher
+ walsender
+ client backend
+ background writer
+ checkpointer
+ walwriter
+(7 rows)
+
+To see all publication in publication instance and by default it will publicate all actions as default for 
+ Name  |  Owner   | All tables | Inserts | Updates | Deletes | Truncates 
+pub=# \dRp  
+
+                                                             ^
+pub=# select slot_name, slot_type,confirmed_flush_lsn from pg_replication_slots;
+ slot_name | slot_type | confirmed_flush_lsn 
+-----------+-----------+---------------------
+ my_sub    | logical   | 0/1669140
+
+pub=# select usename , application_name , state , write_lsn from pg_stat_replication;
+ usename | application_name |   state   | write_lsn 
+---------+------------------+-----------+-----------
+ repuser | my_sub           | streaming | 0/1669140
+(1 row)
+
+
+ 
+
+// on subscriber side 
+sub=# select backend_type from pg_stat_activity;
+         backend_type         
+------------------------------
+ autovacuum launcher
+ logical replication launcher
+ logical replication worker
+ client backend
+ background writer
+ checkpointer
+ walwriter
+(7 rows)
+
+To see all subscriptions and through which publication its connected to 
+sub-# \dRs
+           List of subscriptions
+  Name  |  Owner   | Enabled | Publication 
+--------+----------+---------+-------------
+ my_sub | postgres | t       | {my_pub}
+
+       ^
+sub=# select subname, received_lsn from pg_stat_subscription;
+ subname | received_lsn 
+---------+--------------
+ my_sub  | 0/1669140
+(1 row)
+
+
+sub=# select subname , received_lsn from pg_stat_subscription;
+ subname | received_lsn 
+---------+--------------
+ my_sub  | 0/1669140
+(1 row)
+
+
